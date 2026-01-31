@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CloudOps Platform - DevOps Portfolio</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #0d1117; color: #c9d1d9; line-height: 1.6; }
+        .container { max-width: 1400px; margin: 0 auto; padding: 20px; }
+        .header { text-align: center; margin-bottom: 30px; padding: 30px 0; }
+        .header h1 { color: #58a6ff; font-size: 2.5em; margin-bottom: 10px; font-weight: 300; }
+        .header p { color: #8b949e; font-size: 1.2em; }
+        
+        /* Tab Navigation */
+        .tab-nav { display: flex; background: #161b22; border-radius: 8px; margin-bottom: 20px; overflow: hidden; }
+        .tab-btn { flex: 1; padding: 15px; background: none; border: none; color: #8b949e; cursor: pointer; transition: all 0.2s; }
+        .tab-btn.active { background: #21262d; color: #58a6ff; }
+        .tab-btn:hover { background: #30363d; }
+        
+        /* Tab Content */
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        
+        /* Control Panel */
+        .control-panel { background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 25px; margin-bottom: 20px; }
+        .control-panel h2 { color: #f0f6fc; margin-bottom: 15px; }
+        .button-group { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+        .btn { padding: 10px 20px; border: none; border-radius: 6px; font-size: 14px; cursor: pointer; transition: all 0.2s; font-weight: 500; }
+        .btn-primary { background: #238636; color: white; }
+        .btn-primary:hover { background: #2ea043; }
+        .btn-danger { background: #da3633; color: white; }
+        .btn-danger:hover { background: #f85149; }
+        .btn-warning { background: #d29922; color: white; }
+        .btn-warning:hover { background: #e2a336; }
+        .btn-secondary { background: #21262d; color: #f0f6fc; border: 1px solid #30363d; }
+        .btn-secondary:hover { background: #30363d; }
+        .btn:disabled { background: #484f58; color: #6e7681; cursor: not-allowed; }
+        
+        /* Status Display */
+        .status-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px; }
+        .status-card { background: #0d1117; border: 1px solid #30363d; border-radius: 6px; padding: 15px; text-align: center; }
+        .status-value { font-size: 1.8em; font-weight: bold; color: #58a6ff; margin-bottom: 5px; }
+        .status-label { color: #8b949e; font-size: 0.9em; }
+        .status-indicator { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; }
+        .status-stopped { background: #f85149; }
+        .status-starting { background: #d29922; }
+        .status-running { background: #3fb950; }
+        
+        /* Live Charts */
+        .chart-container { background: #0d1117; border: 1px solid #30363d; border-radius: 6px; padding: 20px; margin-bottom: 20px; height: 300px; }
+        .chart-title { color: #f0f6fc; margin-bottom: 15px; font-size: 1.1em; }
+        .chart-placeholder { display: flex; align-items: center; justify-content: center; height: 200px; color: #6e7681; font-style: italic; }
+        
+        /* Incident Timeline */
+        .incident-timeline { background: #0d1117; border: 1px solid #30363d; border-radius: 6px; padding: 20px; }
+        .incident-item { display: flex; align-items: center; padding: 10px 0; border-bottom: 1px solid #30363d; }
+        .incident-item:last-child { border-bottom: none; }
+        .incident-time { color: #6e7681; font-size: 0.9em; width: 80px; }
+        .incident-status { width: 12px; height: 12px; border-radius: 50%; margin: 0 15px; }
+        .incident-resolved { background: #3fb950; }
+        .incident-warning { background: #d29922; }
+        .incident-critical { background: #f85149; }
+        .incident-text { color: #c9d1d9; }
+        
+        /* Analytics Cards */
+        .analytics-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; }
+        .analytics-card { background: #161b22; border: 1px solid #30363d; border-radius: 6px; padding: 20px; }
+        .analytics-card h3 { color: #58a6ff; margin-bottom: 15px; }
+        .analytics-stat { display: flex; justify-content: space-between; margin-bottom: 10px; }
+        .analytics-stat:last-child { margin-bottom: 0; }
+        
+        /* Logs */
+        .logs { background: #0d1117; border: 1px solid #30363d; border-radius: 6px; padding: 15px; font-family: 'Courier New', monospace; height: 250px; overflow-y: auto; font-size: 13px; }
+        .log-entry { margin-bottom: 3px; }
+        .log-timestamp { color: #6e7681; }
+        .log-info { color: #58a6ff; }
+        .log-success { color: #3fb950; }
+        .log-error { color: #f85149; }
+        .log-warning { color: #d29922; }
+        
+        /* App URL */
+        .app-url { background: #1f2937; border: 1px solid #374151; border-radius: 6px; padding: 15px; margin-top: 15px; display: none; }
+        .app-url a { color: #58a6ff; text-decoration: none; }
+        .app-url a:hover { text-decoration: underline; }
+        
+        /* Two Column Layout */
+        .two-column { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .full-width { grid-column: 1 / -1; }
+        
+        @media (max-width: 768px) {
+            .two-column { grid-template-columns: 1fr; }
+            .button-group { flex-direction: column; }
+            .tab-nav { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>CloudOps Platform</h1>
+            <p>Live Infrastructure Management & Operational Excellence Demo</p>
+        </div>
+
+        <!-- Tab Navigation -->
+        <div class="tab-nav">
+            <button class="tab-btn active" onclick="showTab('dashboard')">Dashboard</button>
+            <button class="tab-btn" onclick="showTab('metrics')">Live Metrics</button>
+            <button class="tab-btn" onclick="showTab('incidents')">Incidents</button>
+            <button class="tab-btn" onclick="showTab('chaos')">Chaos Engineering</button>
+            <button class="tab-btn" onclick="showTab('analytics')">Analytics</button>
+        </div>
+
+        <!-- Dashboard Tab -->
+        <div id="dashboard" class="tab-content active">
+            <div class="control-panel">
+                <h2>Infrastructure Control</h2>
+                <div class="button-group">
+                    <button id="startDemo" class="btn btn-primary">Start Demo (30 min)</button>
+                    <button id="stopDemo" class="btn btn-danger">Emergency Stop</button>
+                    <button id="checkStatus" class="btn btn-secondary">Refresh Status</button>
+                </div>
+                
+                <div class="status-grid">
+                    <div class="status-card">
+                        <div class="status-value" id="instanceCount">0</div>
+                        <div class="status-label">EC2 Instances</div>
+                    </div>
+                    <div class="status-card">
+                        <div class="status-value" id="dbStatus">stopped</div>
+                        <div class="status-label">Database</div>
+                    </div>
+                    <div class="status-card">
+                        <div class="status-value" id="remainingTime">--</div>
+                        <div class="status-label">Minutes Left</div>
+                    </div>
+                    <div class="status-card">
+                        <div class="status-value" id="costPerHour">$0.00</div>
+                        <div class="status-label">Current Cost/Hour</div>
+                    </div>
+                </div>
+                
+                <div id="statusIndicator">
+                    <span class="status-indicator status-stopped"></span>
+                    <span id="statusText">Infrastructure Stopped - Ready for Demo</span>
+                </div>
+                
+                <div id="appUrl" class="app-url">
+                    <strong>Live Application:</strong> <a id="appLink" href="#" target="_blank"></a>
+                    <br><small>API: /health, /api/users, /api/metrics</small>
+                </div>
+            </div>
+            
+            <div id="logs" class="logs"></div>
+        </div>
+
+        <!-- Live Metrics Tab -->
+        <div id="metrics" class="tab-content">
+            <div class="two-column">
+                <div class="chart-container">
+                    <div class="chart-title">CPU Usage (%)</div>
+                    <div class="chart-placeholder" id="cpuChart">Start demo to see live CPU metrics</div>
+                </div>
+                <div class="chart-container">
+                    <div class="chart-title">Memory Usage (%)</div>
+                    <div class="chart-placeholder" id="memoryChart">Start demo to see live memory metrics</div>
+                </div>
+                <div class="chart-container">
+                    <div class="chart-title">Network Traffic (KB/s)</div>
+                    <div class="chart-placeholder" id="networkChart">Start demo to see live network metrics</div>
+                </div>
+                <div class="chart-container">
+                    <div class="chart-title">Database Connections</div>
+                    <div class="chart-placeholder" id="dbChart">Start demo to see live DB metrics</div>
+                </div>
+            </div>
+            
+            <div class="control-panel full-width">
+                <h2>Real-Time System Metrics</h2>
+                <div class="status-grid">
+                    <div class="status-card">
+                        <div class="status-value" id="liveCpu">--</div>
+                        <div class="status-label">CPU Usage</div>
+                    </div>
+                    <div class="status-card">
+                        <div class="status-value" id="liveMemory">--</div>
+                        <div class="status-label">Memory Usage</div>
+                    </div>
+                    <div class="status-card">
+                        <div class="status-value" id="liveNetwork">--</div>
+                        <div class="status-label">Network I/O</div>
+                    </div>
+                    <div class="status-card">
+                        <div class="status-value" id="liveConnections">--</div>
+                        <div class="status-label">DB Connections</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Incidents Tab -->
+        <div id="incidents" class="tab-content">
+            <div class="control-panel">
+                <h2>Incident Management</h2>
+                <p>View and manage operational incidents. All incidents are automatically resolved using best practices.</p>
+            </div>
+            
+            <div class="incident-timeline" id="incidentTimeline">
+                <div class="incident-item">
+                    <div class="incident-time">--:--</div>
+                    <div class="incident-status incident-resolved"></div>
+                    <div class="incident-text">No active incidents. System operating normally.</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chaos Engineering Tab -->
+        <div id="chaos" class="tab-content">
+            <div class="control-panel">
+                <h2>Chaos Engineering</h2>
+                <p>Simulate operational scenarios to test system resilience and incident response procedures.</p>
+                
+                <div class="button-group">
+                    <button class="btn btn-warning" onclick="simulateChaos('cpu_spike')">Simulate CPU Spike</button>
+                    <button class="btn btn-warning" onclick="simulateChaos('memory_leak')">Simulate Memory Leak</button>
+                    <button class="btn btn-warning" onclick="simulateChaos('db_slow')">Simulate DB Issues</button>
+                    <button class="btn btn-warning" onclick="simulateChaos('network_latency')">Simulate Network Issues</button>
+                </div>
+            </div>
+            
+            <div class="two-column">
+                <div class="chart-container">
+                    <div class="chart-title">Chaos Test Results</div>
+                    <div id="chaosResults" class="chart-placeholder">Run a chaos test to see results</div>
+                </div>
+                <div class="chart-container">
+                    <div class="chart-title">Recovery Timeline</div>
+                    <div id="recoveryTimeline" class="chart-placeholder">Recovery metrics will appear here</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Analytics Tab -->
+        <div id="analytics" class="tab-content">
+            <div class="analytics-grid">
+                <div class="analytics-card">
+                    <h3>Demo Usage</h3>
+                    <div class="analytics-stat">
+                        <span>Visits Today:</span>
+                        <span id="visitsToday">--</span>
+                    </div>
+                    <div class="analytics-stat">
+                        <span>Total Demos:</span>
+                        <span id="totalDemos">--</span>
+                    </div>
+                    <div class="analytics-stat">
+                        <span>Avg Duration:</span>
+                        <span id="avgDuration">--</span>
+                    </div>
+                </div>
+                
+                <div class="analytics-card">
+                    <h3>Cost Optimization</h3>
+                    <div class="analytics-stat">
+                        <span>Cost Saved Today:</span>
+                        <span id="costSaved">--</span>
+                    </div>
+                    <div class="analytics-stat">
+                        <span>Uptime:</span>
+                        <span id="uptime">--</span>
+                    </div>
+                    <div class="analytics-stat">
+                        <span>Efficiency:</span>
+                        <span>90% vs Always-On</span>
+                    </div>
+                </div>
+                
+                <div class="analytics-card">
+                    <h3>Popular Features</h3>
+                    <div id="popularFeatures">
+                        <div class="analytics-stat">
+                            <span>Loading...</span>
+                            <span>--</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="analytics-card">
+                    <h3>Recent Activity</h3>
+                    <div id="recentActivity">
+                        <div style="color: #6e7681; font-style: italic;">Loading activity...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_ENDPOINT = 'https://YOUR_API_GATEWAY_URL/prod';
+        
+        // Tab Management
+        function showTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+            
+            // Load tab-specific data
+            if (tabName === 'metrics') loadMetrics();
+            if (tabName === 'analytics') loadAnalytics();
+            if (tabName === 'incidents') loadIncidents();
+        }
+        
+        // Elements
+        const startBtn = document.getElementById('startDemo');
+        const stopBtn = document.getElementById('stopDemo');
+        const statusBtn = document.getElementById('checkStatus');
+        const statusText = document.getElementById('statusText');
+        const statusIndicator = document.querySelector('.status-indicator');
+        const appUrlDiv = document.getElementById('appUrl');
+        const appLink = document.getElementById('appLink');
+        const logs = document.getElementById('logs');
+        
+        // Logging
+        function addLog(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const logClass = `log-${type}`;
+            logs.innerHTML += `<div class="log-entry"><span class="log-timestamp">[${timestamp}]</span> <span class="${logClass}">${message}</span></div>`;
+            logs.scrollTop = logs.scrollHeight;
+        }
+        
+        // Status Updates
+        function updateStatus(state, message, data = {}) {
+            statusText.textContent = message;
+            statusIndicator.className = `status-indicator status-${state}`;
+            
+            document.getElementById('instanceCount').textContent = data.runningInstances || 0;
+            document.getElementById('dbStatus').textContent = data.databaseStatus || 'stopped';
+            document.getElementById('remainingTime').textContent = data.remainingMinutes || '--';
+            document.getElementById('costPerHour').textContent = state === 'running' ? '$0.50' : '$0.00';
+        }
+        
+        // Button States
+        function setButtonStates(starting = false, running = false) {
+            startBtn.disabled = starting || running;
+            stopBtn.disabled = !running && !starting;
+            statusBtn.disabled = starting;
+        }
+        
+        // API Calls
+        async function callAPI(endpoint, method = 'POST', data = null) {
+            try {
+                const options = {
+                    method: method,
+                    headers: { 'Content-Type': 'application/json' }
+                };
+                if (data) options.body = JSON.stringify(data);
+                
+                const response = await fetch(`${API_ENDPOINT}/${endpoint}`, options);
+                return await response.json();
+            } catch (error) {
+                addLog(`API Error: ${error.message}`, 'error');
+                throw error;
+            }
+        }
+        
+        // Load Live Metrics
+        async function loadMetrics() {
+            try {
+                const metrics = await callAPI('metrics', 'GET');
+                document.getElementById('liveCpu').textContent = `${metrics.cpu_usage}%`;
+                document.getElementById('liveMemory').textContent = `${metrics.memory_usage}%`;
+                document.getElementById('liveNetwork').textContent = `${metrics.network_in}KB/s`;
+                document.getElementById('liveConnections').textContent = metrics.active_connections;
+                
+                // Update chart placeholders with live data
+                document.getElementById('cpuChart').innerHTML = `<div style="color: #58a6ff; font-size: 2em; text-align: center; padding-top: 60px;">${metrics.cpu_usage}%</div><div style="text-align: center; color: #8b949e;">Live CPU Usage</div>`;
+                document.getElementById('memoryChart').innerHTML = `<div style="color: #58a6ff; font-size: 2em; text-align: center; padding-top: 60px;">${metrics.memory_usage}%</div><div style="text-align: center; color: #8b949e;">Live Memory Usage</div>`;
+                document.getElementById('networkChart').innerHTML = `<div style="color: #58a6ff; font-size: 2em; text-align: center; padding-top: 60px;">${metrics.network_in}KB/s</div><div style="text-align: center; color: #8b949e;">Network In</div>`;
+                document.getElementById('dbChart').innerHTML = `<div style="color: #58a6ff; font-size: 2em; text-align: center; padding-top: 60px;">${metrics.active_connections}</div><div style="text-align: center; color: #8b949e;">Active Connections</div>`;
+            } catch (error) {
+                addLog('Failed to load metrics', 'error');
+            }
+        }
+        
+        // Load Analytics
+        async function loadAnalytics() {
+            try {
+                const analytics = await callAPI('analytics', 'GET');
+                document.getElementById('visitsToday').textContent = analytics.visits_today;
+                document.getElementById('totalDemos').textContent = analytics.total_demos_run;
+                document.getElementById('avgDuration').textContent = analytics.avg_demo_duration;
+                document.getElementById('costSaved').textContent = analytics.cost_saved_today;
+                document.getElementById('uptime').textContent = `${analytics.uptime_percentage}%`;
+                
+                // Popular Features
+                const featuresDiv = document.getElementById('popularFeatures');
+                featuresDiv.innerHTML = analytics.popular_features.map(f => 
+                    `<div class="analytics-stat"><span>${f.name}:</span><span>${f.usage}</span></div>`
+                ).join('');
+                
+                // Recent Activity
+                const activityDiv = document.getElementById('recentActivity');
+                activityDiv.innerHTML = analytics.recent_activity.map(activity => 
+                    `<div style="margin-bottom: 8px; font-size: 0.9em;">${activity}</div>`
+                ).join('');
+            } catch (error) {
+                addLog('Failed to load analytics', 'error');
+            }
+        }
+        
+        // Load Incidents
+        async function loadIncidents() {
+            // This would load from the incidents API
+            // For now, show placeholder
+        }
+        
+        // Simulate Chaos
+        async function simulateChaos(type) {
+            try {
+                addLog(`🔥 Starting chaos test: ${type}`, 'warning');
+                const result = await callAPI('chaos', 'POST', { chaos_type: type });
+                addLog(`✅ Chaos test completed: ${result.incident.title}`, 'success');
+                
+                // Update chaos results
+                const resultsDiv = document.getElementById('chaosResults');
+                resultsDiv.innerHTML = `
+                    <div style="color: #f0f6fc; margin-bottom: 10px;"><strong>${result.incident.title}</strong></div>
+                    <div style="color: #8b949e; margin-bottom: 10px;">${result.incident.description}</div>
+                    <div style="color: #3fb950;">Resolution: ${result.incident.resolution_time}</div>
+                `;
+                
+                // Update timeline
+                const timelineDiv = document.getElementById('recoveryTimeline');
+                timelineDiv.innerHTML = result.incident.timeline.map(event => 
+                    `<div style="margin-bottom: 8px; font-size: 0.9em;">
+                        <span style="color: #6e7681;">${new Date(event.time).toLocaleTimeString()}</span> - 
+                        <span style="color: #c9d1d9;">${event.event}</span>
+                    </div>`
+                ).join('');
+                
+            } catch (error) {
+                addLog(`❌ Chaos test failed: ${error.message}`, 'error');
+            }
+        }
+        
+        // Main Demo Controls
+        startBtn.addEventListener('click', async () => {
+            addLog('🚀 Starting infrastructure deployment...', 'info');
+            updateStatus('starting', 'Starting Infrastructure...', {});
+            setButtonStates(true, false);
+            appUrlDiv.style.display = 'none';
+            
+            try {
+                const result = await callAPI('start');
+                addLog(`✅ Start request successful. Session: ${result.sessionId}`, 'success');
+                
+                const pollInterval = setInterval(async () => {
+                    try {
+                        const status = await callAPI('status', 'GET');
+                        addLog(`📊 Status: ${status.state} | Instances: ${status.runningInstances}`, 'info');
+                        
+                        updateStatus(status.state, 
+                            status.state === 'running' ? `Infrastructure Running (${status.remainingMinutes}m left)` : 'Starting Infrastructure...', 
+                            status
+                        );
+                        
+                        if (status.state === 'running') {
+                            clearInterval(pollInterval);
+                            setButtonStates(false, true);
+                            addLog('🎉 Infrastructure is live! All features now available.', 'success');
+                            
+                            if (status.applicationUrl) {
+                                appLink.href = status.applicationUrl;
+                                appLink.textContent = status.applicationUrl;
+                                appUrlDiv.style.display = 'block';
+                            }
+                        }
+                    } catch (error) {
+                        addLog(`Polling error: ${error.message}`, 'error');
+                    }
+                }, 30000);
+                
+            } catch (error) {
+                updateStatus('stopped', 'Start failed');
+                setButtonStates(false, false);
+            }
+        });
+        
+        stopBtn.addEventListener('click', async () => {
+            addLog('🛑 Stopping infrastructure...', 'warning');
+            updateStatus('stopping', 'Stopping Infrastructure...');
+            setButtonStates(false, false);
+            
+            try {
+                await callAPI('stop');
+                addLog('✅ Stop request sent successfully', 'success');
+                appUrlDiv.style.display = 'none';
+                
+                setTimeout(() => {
+                    updateStatus('stopped', 'Infrastructure Stopped - Ready for Demo', {});
+                    addLog('💰 Infrastructure stopped - costs minimized', 'success');
+                }, 5000);
+            } catch (error) {
+                addLog('❌ Stop request failed', 'error');
+            }
+        });
+        
+        statusBtn.addEventListener('click', async () => {
+            addLog('🔍 Checking infrastructure status...', 'info');
+            try {
+                const status = await callAPI('status', 'GET');
+                
+                if (status.state === 'running') {
+                    updateStatus('running', `Infrastructure Running (${status.remainingMinutes}m left)`, status);
+                    setButtonStates(false, true);
+                    if (status.applicationUrl) {
+                        appLink.href = status.applicationUrl;
+                        appLink.textContent = status.applicationUrl;
+                        appUrlDiv.style.display = 'block';
+                    }
+                } else if (status.state === 'starting') {
+                    updateStatus('starting', 'Infrastructure Starting...', status);
+                    setButtonStates(true, false);
+                } else {
+                    updateStatus('stopped', 'Infrastructure Stopped - Ready for Demo', status);
+                    setButtonStates(false, false);
+                    appUrlDiv.style.display = 'none';
+                }
+            } catch (error) {
+                addLog('❌ Status check failed', 'error');
+            }
+        });
+        
+        // Initialize
+        addLog('🏗️ CloudOps Platform Ready', 'success');
+        addLog('💡 Click "Start Demo" to deploy full infrastructure for 30 minutes', 'info');
+        addLog('📊 Use tabs above to explore live metrics, incidents, and analytics', 'info');
+        statusBtn.click();
+        
+        // Auto-refresh metrics when on metrics tab
+        setInterval(() => {
+            if (document.getElementById('metrics').classList.contains('active')) {
+                loadMetrics();
+            }
+        }, 10000);
+    </script>
+</body>
+</html>

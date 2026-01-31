@@ -1,0 +1,31 @@
+# CloudOps Platform Configuration
+# Copy this file to terraform.tfvars and update with your values
+
+# AWS Configuration
+aws_region = "us-east-1"
+
+# Project Configuration
+project_name = "cloudops-platform"
+environment  = "prod"
+
+# Database Configuration
+# REQUIRED: Set a strong password for the database
+db_password = "CHANGE_ME_TO_SECURE_PASSWORD"
+
+# Notification Configuration
+# REQUIRED: Set your email for receiving alerts
+notification_email = "your-email@example.com"
+
+# EC2 Configuration
+instance_type = "t3.micro"  # Use t3.small or larger for production
+
+# Auto Scaling Configuration
+min_size         = 2  # Minimum number of instances
+max_size         = 6  # Maximum number of instances
+desired_capacity = 2  # Initial number of instances
+
+# Example production values:
+# instance_type = "t3.small"
+# min_size = 3
+# max_size = 10
+# desired_capacity = 3
